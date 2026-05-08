@@ -1707,6 +1707,21 @@ export function createUtilities(theme: Theme) {
   }
 
   /**
+   * @css `zoom`
+   */
+  functionalUtility('zoom', {
+    handleBareValue: ({ value }) => {
+      if (!isPositiveInteger(value)) return null
+      return `${value}%`
+    },
+    handle: (value) => [decl('zoom', value)],
+  })
+
+  suggest('zoom', () => [
+    { values: ['50', '75', '90', '95', '100', '105', '110', '125', '150', '200'] },
+  ])
+
+  /**
    * @css `transform-style`
    */
   staticUtility('transform-flat', [['transform-style', 'flat']])
