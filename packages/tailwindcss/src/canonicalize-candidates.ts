@@ -2614,13 +2614,9 @@ function createUtilityPropertiesCache(
       let parsed = designSystem.parseCandidate(className)
       if (parsed.length === 0) return localPropertyValueLookup
 
-      walk(
-        canonicalizeAst(
-          designSystem,
-          designSystem.compileAstNodes(parsed[0]).map((x) => cloneAstNode(x.node)),
-          options,
-        ),
-        (node) => {
+      try {
+        let ast = designSystem.compileAstNodes(parsed[0]).map((x) => cloneAstNode(x.node))
+        walk(canonicalizeAst(designSystem, ast, options), (node) => {
           if (node.kind === 'declaration') {
             localPropertyValueLookup.get(node.property).add(node.value!)
             designSystem.storage[STATIC_UTILITIES_KEY].get(options)
@@ -2628,8 +2624,12 @@ function createUtilityPropertiesCache(
               .get(node.value!)
               .add(className)
           }
-        },
-      )
+        })
+      } catch {
+        // Ignore errors, this could happen when we call a plugin with a value
+        // it didn't expect. But since plugins are functions, we can't know
+        // ahead of time what it expects.
+      }
 
       return localPropertyValueLookup
     })
