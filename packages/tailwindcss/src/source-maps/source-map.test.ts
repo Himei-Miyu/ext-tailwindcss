@@ -865,25 +865,19 @@ test('Source locations for `addBase` point to the `@plugin` that generated them'
 
   expect(annotations).toMatchInlineSnapshot(`
     "
-        output.css                  |    input.css
-                                    | 
-     1  @layer base {               | 1  @plugin "./plugin.js";
-        ^^^^^^^^^^^^ A @ 1:0-12     |    ^^^^^^^^^^^^^^^^^^^^^ A @ 1:0-21
-     2    body {                    | 
-          ^^^^^ A @ 2:2-7           | 
-     3      color: red;             | 
-            ^^^^^^^^^^ A @ 3:4-14   | 
-     4    }                         | 
-     5  }                           | 
-     6  @layer base {               | 2  @config "./config.js";
-        ^^^^^^^^^^^^ B @ 6:0-12     |    ^^^^^^^^^^^^^^^^^^^^^ B @ 2:0-21
-     7    body {                    | 
-          ^^^^^ B @ 7:2-7           | 
-     8      color: green;           | 
-            ^^^^^^^^^^^^ B @ 8:4-16 | 
-     9    }                         | 
-    10  }                           | 
-    11                              | 
+       output.css                  |    input.css
+                                   | 
+    1  @layer base {               | 1  @plugin "./plugin.js";
+       ^^^^^^^^^^^^ A @ 1:0-12     |    ^^^^^^^^^^^^^^^^^^^^^ A @ 1:0-21
+    2    body {                    | 
+         ^^^^^ A @ 2:2-7           | 
+    3      color: red;             | 
+           ^^^^^^^^^^ A @ 3:4-14   | 
+    4      color: green;           | 2  @config "./config.js";
+           ^^^^^^^^^^^^ B @ 4:4-16 |    ^^^^^^^^^^^^^^^^^^^^^ B @ 2:0-21
+    5    }                         | 
+    6  }                           | 
+    7                              | 
     "
   `)
 })

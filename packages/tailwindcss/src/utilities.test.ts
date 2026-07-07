@@ -11581,20 +11581,20 @@ test('scrollbar-width', async () => {
 test('scrollbar-gutter', async () => {
   expect(await run(['scrollbar-gutter-auto', 'scrollbar-gutter-stable', 'scrollbar-gutter-both']))
     .toMatchInlineSnapshot(`
-    "
-    .scrollbar-gutter-auto {
-      scrollbar-gutter: auto;
-    }
+      "
+      .scrollbar-gutter-auto {
+        scrollbar-gutter: auto;
+      }
 
-    .scrollbar-gutter-both {
-      scrollbar-gutter: stable both-edges;
-    }
+      .scrollbar-gutter-both {
+        scrollbar-gutter: stable both-edges;
+      }
 
-    .scrollbar-gutter-stable {
-      scrollbar-gutter: stable;
-    }
-    "
-  `)
+      .scrollbar-gutter-stable {
+        scrollbar-gutter: stable;
+      }
+      "
+    `)
   expect(
     await run([
       'scrollbar-gutter',
@@ -30204,20 +30204,20 @@ describe('custom utilities', () => {
       `
 
       expect(await run(['border--0', 'border--1', 'border--2'], input)).toMatchInlineSnapshot(`
-          "
-          .border--0 {
-            border-color: var(--color-border-0, #e5e7eb);
-          }
+        "
+        .border--0 {
+          border-color: var(--color-border-0, #e5e7eb);
+        }
 
-          .border--1 {
-            border-color: var(--color-border-1, #d1d5db);
-          }
+        .border--1 {
+          border-color: var(--color-border-1, #d1d5db);
+        }
 
-          .border--2 {
-            border-color: var(--color-border-2, #9ca3af);
-          }
-          "
-        `)
+        .border--2 {
+          border-color: var(--color-border-2, #9ca3af);
+        }
+        "
+      `)
       expect(await run(['border--3'], input)).toEqual('')
     })
 
@@ -30313,20 +30313,20 @@ describe('custom utilities', () => {
       `
 
       expect(await run(['example-1', 'example-76', 'example-971'], input)).toMatchInlineSnapshot(`
-          "
-          .example-1 {
-            --resolved-value: 1;
-          }
+        "
+        .example-1 {
+          --resolved-value: 1;
+        }
 
-          .example-76 {
-            --resolved-value: 76;
-          }
+        .example-76 {
+          --resolved-value: 76;
+        }
 
-          .example-971 {
-            --resolved-value: 971;
-          }
-          "
-        `)
+        .example-971 {
+          --resolved-value: 971;
+        }
+        "
+      `)
       expect(await run(['example-foo'], input)).toEqual('')
     })
 
@@ -30650,20 +30650,20 @@ describe('custom utilities', () => {
       `
 
       expect(await run(['example-a', 'example-76', 'example-[123]'], input)).toMatchInlineSnapshot(`
-          "
-          .example-76 {
-            --resolved-value: 76;
-          }
+        "
+        .example-76 {
+          --resolved-value: 76;
+        }
 
-          .example-\\[123\\] {
-            --resolved-value: 123;
-          }
+        .example-\\[123\\] {
+          --resolved-value: 123;
+        }
 
-          .example-a {
-            --resolved-value: var(--example-a, 8);
-          }
-          "
-        `)
+        .example-a {
+          --resolved-value: var(--example-a, 8);
+        }
+        "
+      `)
       expect(await run(['example-[#0088cc]', 'example-[1px]'], input)).toEqual('')
     })
 

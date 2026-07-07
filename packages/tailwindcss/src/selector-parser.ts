@@ -70,7 +70,7 @@ function compound(nodes: SelectorAstNode[]): SelectorCompoundNode {
   }
 }
 
-function fun(value: string, nodes: SelectorAstNode[]): SelectorFunctionNode {
+export function fun(value: string, nodes: SelectorAstNode[]): SelectorFunctionNode {
   return {
     kind: 'function',
     value,
@@ -85,7 +85,7 @@ function list(nodes: SelectorAstNode[]): SelectorListNode {
   }
 }
 
-function selector(value: string): SelectorNode {
+export function selector(value: string): SelectorNode {
   return {
     kind: 'selector',
     value,
@@ -96,6 +96,80 @@ function value(value: string): SelectorValueNode {
   return {
     kind: 'value',
     value,
+  }
+}
+
+export function isUniversalSelector(node: SelectorAstNode): boolean {
+  return node.kind === 'selector' && node.value.charCodeAt(0) === ASTERISK
+}
+
+export function isNestingSelector(node: SelectorAstNode): boolean {
+  return node.kind === 'selector' && node.value.charCodeAt(0) === AMPERSAND
+}
+
+export function isClassSelector(node: SelectorAstNode): boolean {
+  return node.kind === 'selector' && node.value.charCodeAt(0) === DOT
+}
+
+export function isIdSelector(node: SelectorAstNode): boolean {
+  return node.kind === 'selector' && node.value.charCodeAt(0) === HASH
+}
+
+export function isPseudoSelector(node: SelectorAstNode): boolean {
+  return node.kind === 'selector' && node.value.charCodeAt(0) === COLON
+}
+
+export function isAttributeSelector(node: SelectorAstNode): boolean {
+  return node.kind === 'selector' && node.value.charCodeAt(0) === OPEN_BRACKET
+}
+
+export function isTypeSelector(node: SelectorAstNode): boolean {
+  if (node.kind !== 'selector') return false
+
+  switch (node.value.charCodeAt(0)) {
+    case ASTERISK: // Universal selector
+    case AMPERSAND: // Nesting selector
+    case DOT: // Class selector
+    case HASH: // ID selector
+    case COLON: // Pseudo selector
+    case OPEN_BRACKET: // Attribute selector
+      return false
+
+    // We don't fully verify whether this is actually a proper type selector,
+    // but we assume it is one if it's not any of the other ones.
+    default:
+      return true
+  }
+}
+
+export function cloneAstNode<T extends SelectorAstNode>(node: T): T {
+  switch (node.kind) {
+    case 'combinator':
+    case 'selector':
+    case 'value':
+      return {
+        kind: node.kind,
+        value: node.value,
+      } as T
+
+    case 'complex':
+    case 'compound':
+    case 'list':
+      return {
+        kind: node.kind,
+        nodes: node.nodes.map(cloneAstNode),
+      } as T
+
+    case 'function':
+      return {
+        kind: node.kind,
+        value: node.value,
+        nodes: node.nodes.map(cloneAstNode),
+      } satisfies SelectorFunctionNode as T
+
+    default:
+      node satisfies never
+      throw new Error(`Unknown node kind: ${(node as any).kind}`)
   }
 }
 
@@ -141,10 +215,10 @@ const CLOSE_PAREN = 0x29
 const COLON = 0x3a
 const COMMA = 0x2c
 const DOUBLE_QUOTE = 0x22
-const FULL_STOP = 0x2e
+const DOT = 0x2e
 const GREATER_THAN = 0x3e
 const NEWLINE = 0x0a
-const NUMBER_SIGN = 0x23
+const HASH = 0x23
 const OPEN_BRACKET = 0x5b
 const OPEN_PAREN = 0x28
 const PLUS = 0x2b
@@ -305,7 +379,7 @@ export function parse(input: string) {
         let node = fun(buffer, [])
         buffer = ''
 
-        // If the function is not one of the following, we combine all it's
+        // If the function is not one of the following, we combine all its
         // contents into a single value node
         if (
           node.value !== ':not' &&
@@ -334,7 +408,39 @@ export function parse(input: string) {
           }
           let end = i
 
-          node.nodes.push(value(input.slice(start, end)))
+          let contents = input.slice(start, end)
+
+          // `:nth-child(…)` and `:nth-last-child(…)` can contain an
+          // `of <complex-selector-list>` clause. The selector list must be
+          // parsed (e.g. to be able to substitute `&`), but the `An+B` part
+          // is not a selector so it stays an opaque value node. E.g.:
+          //
+          // ```css
+          // :nth-child(2n + 1 of .foo, .bar)
+          //            ^^^^^^^^^^ value
+          //                       ^^^^^^^^^^ selector list
+          // ```
+          if (node.value === ':nth-child' || node.value === ':nth-last-child') {
+            let idx = contents.indexOf('of ')
+            if (idx !== -1) {
+              node.nodes.push(
+                value(
+                  contents.slice(0, idx + 3), // value `2n + 1 of `
+                ),
+                ...parse(
+                  contents.slice(idx + 3), // `.foo, .bar`
+                ),
+              )
+              buffer = ''
+              i = end
+
+              append(node)
+
+              break
+            }
+          }
+
+          node.nodes.push(value(contents))
           buffer = ''
           i = end
 
@@ -389,9 +495,9 @@ export function parse(input: string) {
       // .foo.bar
       //     ^
       // ```
-      case FULL_STOP:
+      case DOT:
       case COLON:
-      case NUMBER_SIGN: {
+      case HASH: {
         if (currentChar === COLON && buffer === ':') {
           buffer += input[i]
           break
